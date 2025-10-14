@@ -24,6 +24,10 @@ Route::post('/register', [AuthController::class, 'register']);
 // Login de usuarios ya registrados
 Route::post('/login', [AuthController::class, 'login']);
 
+// Restablecimiento de contraseña
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
 // Logout del usuario
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 

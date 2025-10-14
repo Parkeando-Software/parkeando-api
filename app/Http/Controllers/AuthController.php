@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\Customer;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -100,5 +104,73 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Acceso denegado'], 403);
+    }
+
+    /**
+     * Envía un email con el enlace para restablecer la contraseña
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        
+        $user = User::where('email', $validated['email'])->first();
+        
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No existe una cuenta registrada con este email.'
+            ], 404);
+        }
+
+        // Generar token de reset
+        $token = Password::getRepository()->create($user);
+        
+        // Enviar notificación por email
+        $user->notify(new ResetPasswordNotification($token));
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Se ha enviado un enlace de restablecimiento a tu email.'
+        ], 200);
+    }
+
+    /**
+     * Restablece la contraseña del usuario usando el token
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        
+        // Verificar que el token sea válido
+        $user = User::where('email', $validated['email'])->first();
+        
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No existe una cuenta registrada con este email.'
+            ], 404);
+        }
+
+        // Verificar el token usando el sistema de Laravel
+        $status = Password::getRepository()->exists($user, $validated['token']);
+        
+        if (!$status) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'El token de restablecimiento no es válido o ha expirado.'
+            ], 400);
+        }
+
+        // Actualizar la contraseña
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        // Eliminar el token usado
+        Password::getRepository()->delete($user);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Tu contraseña ha sido restablecida exitosamente.'
+        ], 200);
     }
 }
