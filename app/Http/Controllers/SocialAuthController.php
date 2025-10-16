@@ -63,7 +63,7 @@ class SocialAuthController extends Controller
                         'email'    => $email ?? "no-email-{$provider}-{$providerId}@example.local",
                         'password' => bcrypt(Str::random(32)), // placeholder
                         'phone'    => null,
-                        
+                        'accept_terms' => true,
                         'account_activated' => true,
                     ]);
                 }

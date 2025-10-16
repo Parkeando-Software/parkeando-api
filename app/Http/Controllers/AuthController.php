@@ -83,6 +83,14 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // Bloquea acceso si los terminos no fueron aceptados
+        if (!$user->accept_terms) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Debe aceptar los términos y condiciones para iniciar sesión.'
+            ], 403);
+        }
+
         // Revoca tokens previos y genera uno nuevo
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
