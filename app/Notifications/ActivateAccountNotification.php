@@ -25,7 +25,7 @@ class ActivateAccountNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $activationUrl = config('app.frontend_url') . '/activar-cuenta?token=' . $this->token;
+        $activationUrl = config('app.frontend_url') . '/activate-account?token=' . $this->token;
 
         return (new MailMessage)
             ->subject('Activa tu cuenta - Parkeando')
