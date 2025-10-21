@@ -26,6 +26,7 @@ class User extends Authenticatable
         'phone',               // Teléfono opcional
         'accept_terms',        // Aceptación de términos y condiciones
         'account_activated',   // Estado de activación de la cuenta
+        'activation_token'     // Tokenm de activación de cuenta    
     ];
 
     /**
