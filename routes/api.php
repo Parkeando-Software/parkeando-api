@@ -21,6 +21,9 @@ Route::post('/auth/facebook',[SocialAuthController::class, 'facebook']);
 // Registro de usuarios (customers)
 Route::post('/register', [AuthController::class, 'register']);
 
+// Activación cuenta
+Route::get('/activate/{token}', [AuthController::class, 'activateAccount'])->name('activate.account');
+
 // Login de usuarios ya registrados
 Route::post('/login', [AuthController::class, 'login']);
 
