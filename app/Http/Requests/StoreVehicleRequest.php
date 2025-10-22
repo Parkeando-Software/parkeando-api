@@ -20,7 +20,7 @@ class StoreVehicleRequest extends FormRequest
     return [
         'plate' => [
             'required',
-            'regex:/^[0-9]{4}[A-Z]{3}$/',//regex de matricula moderna, sopesar si poner tb matricula antigua
+            'regex:/^(?:[0-9]{4}[A-Z]{3}|[A-Z]{1,2}-?[0-9]{1,6}-?[A-Z]{0,2})$/',//regex de matricula moderna y provinciales
             Rule::unique('vehicles', 'plate') //la matricula debe ser unica
                 ->where('user_id', $userId)
                 ->ignore($vehicleId), //se ignora la matricula unica en el vehiculo que se intente editar
