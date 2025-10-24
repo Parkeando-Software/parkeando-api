@@ -19,15 +19,22 @@ class RegisterRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
-        return [
-            'name'          => 'required|string|max:255',
-            'email'         => 'required|email|unique:users',
-            'password'      => 'required|min:6',
-            'phone'         => 'nullable|string|max:20',
-            'city'          => 'nullable|string|max:255',
-            'accept_terms'  => 'required|accepted', // ✅ campo añadido
-        ];
-    }
+ public function rules(): array
+{
+    return [
+        'name'          => 'required|string|max:255',
+        'email'         => 'required|email|unique:users',
+        'password'      => [
+            'required',
+            'string',
+            'min:8',
+            'max:16',
+            'regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,16}$/'
+        ],
+        'phone'         => 'nullable|string|max:20',
+        'city'          => 'nullable|string|max:255',
+        'accept_terms'  => 'required|accepted',
+    ];
+}
+
 }
