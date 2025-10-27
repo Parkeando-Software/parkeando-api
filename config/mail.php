@@ -14,7 +14,18 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'smtp'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contact Form Email
+    |--------------------------------------------------------------------------
+    |
+    | This is the email address where contact form submissions will be sent.
+    |
+    */
+
+    'contact_email' => env('MAIL_CONTACT_EMAIL', 'info@parkeando.com'),
 
     /*
     |--------------------------------------------------------------------------

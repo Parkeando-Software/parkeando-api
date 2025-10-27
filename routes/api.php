@@ -10,6 +10,8 @@ use App\Http\Controllers\WaitRequestController;
 use App\Http\Controllers\ParkingHistoryController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\InboxController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ContactController;
 
 
 /* RUTAS */
@@ -94,4 +96,20 @@ Route::middleware('auth:sanctum')->post('/notifications/{id}/confirm', [Notifica
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me/inbox', [InboxController::class, 'index']);
     Route::post('/me/inbox/read', [InboxController::class, 'markRead']);
+});
+
+// Eliminación de cuenta y datos personales
+Route::prefix('account')->group(function () {
+    // Solicitud de eliminación de cuenta
+    Route::post('/delete-request', [AccountController::class, 'deleteRequest'])
+        ->middleware('throttle:5,1'); // Rate limiting: 5 requests por minuto
+    
+    // Confirmar solicitud de eliminación
+    Route::get('/delete-request/confirm/{token}', [AccountController::class, 'confirmDeleteRequest']);
+    
+    // Cancelar solicitud de eliminación
+    Route::post('/delete-request/cancel/{token}', [AccountController::class, 'cancelDeleteRequest']);
+    
+    // Obtener estado de solicitud de eliminación
+    Route::get('/delete-request/status/{token}', [AccountController::class, 'getDeleteRequestStatus']);
 });
