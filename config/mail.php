@@ -25,7 +25,7 @@ return [
     |
     */
 
-    'contact_email' => env('MAIL_CONTACT_EMAIL', 'info@parkeando.com'),
+    'contact_email' => env('MAIL_CONTACT_EMAIL', 'info@parkeando.es'),
 
     /*
     |--------------------------------------------------------------------------
@@ -122,8 +122,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'info@parkeando.es'),
+        'name' => env('MAIL_FROM_NAME', 'Parkeando'),
     ],
 
 ];
