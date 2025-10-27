@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,16 +14,26 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
-            $table->string('name');
+
+            $table->foreignId('role_id')
+                  ->constrained('roles')
+                  ->cascadeOnDelete();
+
+            $table->string('username', 30); // requerido
+            $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->string('password');
-            $table->boolean('accept_terms')->default(false);      // <-- añadido
-            $table->boolean('account_activated')->default(false); // <-- añadido
+
+            $table->boolean('accept_terms')->default(false);
+            $table->boolean('account_activated')->default(false);
             $table->string('phone')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });
+
+        // ✅ Índice único funcional para unicidad case-insensitive
+        DB::statement('CREATE UNIQUE INDEX users_username_lower_unique ON users (LOWER(username))');
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -45,8 +56,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        // eliminar primero el índice funcional
+        DB::statement('DROP INDEX IF EXISTS users_username_lower_unique');
+
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

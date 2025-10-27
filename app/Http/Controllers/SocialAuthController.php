@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\SocialAccount;
 use App\Models\User;
-use App\Models\Customer; // ⬅️ importar
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB; // ⬅️ (recomendado) transacción
+use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
@@ -21,16 +21,6 @@ class SocialAuthController extends Controller
             ->userFromToken($request->access_token);
 
         return $this->handleProvider('google', $p, $request->access_token);
-    }
-
-    public function facebook(Request $request)
-    {
-        $request->validate(['access_token' => 'required|string']);
-
-        $p = Socialite::driver('facebook')->stateless()
-            ->userFromToken($request->access_token);
-
-        return $this->handleProvider('facebook', $p, $request->access_token);
     }
 
     protected function handleProvider(string $provider, $providerUser, ?string $accessToken = null)
@@ -54,22 +44,32 @@ class SocialAuthController extends Controller
                 // 2) ¿hay usuario con ese email? (si viene) → vincular
                 $user = $email ? User::where('email', $email)->first() : null;
 
-                if (!$user) {
+                if (! $user) {
                     // 3) crear usuario nuevo (role por defecto)
-                    $defaultRoleId = config('auth.default_role_id', 2); // ajustar a su caso
+                    $defaultRoleId = config('auth.default_role_id', 1);
+
+                    // (A) guardar con username temporal único (NOT NULL + unique garantizado)
+                    $tempUsername = 'tmp-' . str_replace('-', '', Str::uuid()); // <= 36, pero tu columna es 30
+                    $tempUsername = substr($tempUsername, 0, 30);
+
                     $user = User::create([
-                        'role_id'  => $defaultRoleId,
-                        'name'     => $name,
-                        'email'    => $email ?? "no-email-{$provider}-{$providerId}@example.local",
-                        'password' => bcrypt(Str::random(32)), // placeholder
-                        'phone'    => null,
-                        'accept_terms' => true,
+                        'role_id'           => $defaultRoleId,
+                        'username'          => $tempUsername,          // placeholder
+                        'name'              => $name ?? null,          // name es nullable
+                        'email'             => $email ?? "no-email-{$provider}-{$providerId}@example.local",
+                        'password'          => bcrypt(Str::random(32)), // placeholder
+                        'phone'             => null,
+                        'accept_terms'      => true,
                         'account_activated' => true,
                     ]);
+
+                    // (B) actualizar al definitivo: Parki{id}
+                    $finalUsername = 'parki_' . $user->id + 12598;
+                    $user->update(['username' => $finalUsername]);
                 }
 
-                // 4) crear el vínculo social
-                $social = SocialAccount::create([
+                // 4) crear el vínculo social si no existía
+                SocialAccount::create([
                     'user_id'        => $user->id,
                     'provider'       => $provider,
                     'provider_id'    => $providerId,
@@ -77,22 +77,22 @@ class SocialAuthController extends Controller
                 ]);
             }
 
-            // ⬅️ 5) **Asegurar Customer** (clave del fix)
-            //     NOTA: ajustar campos por defecto a su esquema (points/reputation u otros NOT NULL)
+            // 5) Asegurar Customer asociado
             Customer::firstOrCreate(
                 ['user_id' => $user->id],
-                ['points' => 0, 'reputation' => 5]
+                ['points' => 0, 'reputation' => 5.0]
             );
 
-            // 6) emitir token (alineado con el flujo clásico)
+            // 6) Emitir token
             $token = $user->createToken('mobile', ['*'])->plainTextToken;
 
             return response()->json([
                 'token' => $token,
                 'user'  => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
-                    'email' => $user->email,
+                    'id'       => $user->id,
+                    'username' => $user->username,
+                    'name'     => $user->name,
+                    'email'    => $user->email,
                 ],
             ]);
         });

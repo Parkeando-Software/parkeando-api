@@ -39,22 +39,23 @@ class AuthController extends Controller
 
         // Crear usuario base
         $user = User::create([
-            'role_id' => 1,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'phone' => $validated['phone'] ?? null,
-            'accept_terms' => true,
+            'role_id'           => 1,
+            'username'          => $validated['username'],       // ← añadido (obligatorio y único)
+            'name'              => $validated['name'] ?? null,   // ← ahora nullable
+            'email'             => $validated['email'],
+            'password'          => Hash::make($validated['password']),
+            'phone'             => $validated['phone'] ?? null,
+            'accept_terms'      => true,
             'account_activated' => false,
             'activation_token'  => $token,
         ]);
 
         // Crear cliente asociado
         Customer::create([
-            'user_id' => $user->id,
-            'points' => 0,
+            'user_id'    => $user->id,
+            'points'     => 0,
             'reputation' => 5.0,
-            'city' => $validated['city'] ?? null,
+            'city'       => $validated['city'] ?? null,
         ]);
 
         // Enviar email de activación
@@ -62,7 +63,7 @@ class AuthController extends Controller
 
         // Enviar solo confirmación (sin token ni datos)
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Registro completado. Revise su correo para activar la cuenta.',
         ], 201);
     }
@@ -73,24 +74,25 @@ class AuthController extends Controller
 
         if (! $user) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'El enlace de activación no es válido o ya ha sido utilizado.',
             ], 400);
         }
 
         $user->update([
             'account_activated' => true,
-            'activation_token' => null,
+            'activation_token'  => null,
         ]);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.',
         ]);
     }
 
     /**
-     * Login del usuario
+     * Login del usuario (de momento mantenemos el login solo con email, en un futuro cuando haya trabajadores se incluye
+     * login con usuario)
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -99,7 +101,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Credenciales incorrectas.',
             ], 401);
         }
@@ -107,15 +109,15 @@ class AuthController extends Controller
         // Bloquea acceso si la cuenta no está activada
         if (! $user->account_activated) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Esta cuenta aún no está activada. Revise su correo electrónico.',
             ], 403);
         }
 
-        // Bloquea acceso si los terminos no fueron aceptados
+        // Bloquea acceso si los términos no fueron aceptados
         if (! $user->accept_terms) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Debe aceptar los términos y condiciones para iniciar sesión.',
             ], 403);
         }
@@ -126,7 +128,7 @@ class AuthController extends Controller
 
         return response()->json([
             'access_token' => $token,
-            'user' => new UserResource($user->load(['customer', 'role'])),
+            'user'         => new UserResource($user->load(['customer', 'role'])),
         ], 201);
     }
 
@@ -155,7 +157,7 @@ class AuthController extends Controller
 
         if (! $user) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'No existe una cuenta registrada con este email.',
             ], 404);
         }
@@ -167,7 +169,7 @@ class AuthController extends Controller
         $user->notify(new ResetPasswordNotification($token));
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Se ha enviado un enlace de restablecimiento a tu email.',
         ], 200);
     }
@@ -184,7 +186,7 @@ class AuthController extends Controller
 
         if (! $user) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'No existe una cuenta registrada con este email.',
             ], 404);
         }
@@ -194,7 +196,7 @@ class AuthController extends Controller
 
         if (! $status) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'El token de restablecimiento no es válido o ha expirado.',
             ], 400);
         }
@@ -207,7 +209,7 @@ class AuthController extends Controller
         Password::getRepository()->delete($user);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Tu contraseña ha sido restablecida exitosamente.',
         ], 200);
     }

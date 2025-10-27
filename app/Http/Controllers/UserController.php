@@ -14,7 +14,18 @@ class UserController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'  => ['sometimes','string','max:255'],
+            // name ahora puede ponerse a null
+            'name'     => ['sometimes','nullable','string','max:255'],
+
+            'username' => [
+                'sometimes',
+                'string',
+                'min:4',
+                'max:30',
+                'regex:/^[a-z0-9._-]+$/', // mismo formato que en RegisterRequest
+                Rule::unique('users', 'username')->ignore($user->id),
+            ],
+
             'email' => ['sometimes','email','max:255', Rule::unique('users','email')->ignore($user->id)],
             'phone' => ['sometimes','nullable','string','max:20'],
             'city'  => ['sometimes','nullable','string','max:100'],
@@ -22,7 +33,10 @@ class UserController extends Controller
 
         DB::transaction(function () use ($user, $validated) {
             // Actualiza User solo con lo que venga
-            $user->fill(array_intersect_key($validated, array_flip(['name','email','phone'])))->save();
+            $user->fill(array_intersect_key(
+                $validated,
+                array_flip(['name','username','email','phone'])
+            ))->save();
 
             // Actualiza City si viene en la request
             if (array_key_exists('city', $validated) && $user->customer) {
