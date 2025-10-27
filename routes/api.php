@@ -113,3 +113,6 @@ Route::prefix('account')->group(function () {
     // Obtener estado de solicitud de eliminación
     Route::get('/delete-request/status/{token}', [AccountController::class, 'getDeleteRequestStatus']);
 });
+
+// Formulario de contacto
+Route::post('/contact', [ContactController::class, 'submit']);
