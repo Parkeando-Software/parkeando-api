@@ -13,13 +13,15 @@ class RegisterRequest extends FormRequest
     }
 
     /**
-     * Normaliza el username (minúsculas y trim) antes de validar.
+     * Ya no se normaliza el username.
+     * Se conserva el formato original (por ejemplo "Billy").
      */
     protected function prepareForValidation(): void
     {
+        // Solo trim para eliminar espacios accidentales
         if ($this->has('username')) {
             $this->merge([
-                'username' => strtolower(trim((string) $this->input('username'))),
+                'username' => trim((string) $this->input('username')),
             ]);
         }
     }
@@ -27,33 +29,32 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // ahora requerido y único en users
             'username' => [
                 'required',
                 'string',
                 'min:4',
                 'max:30',
-                'regex:/^[a-z0-9._-]+$/',     // minúsculas, números, punto, guion, guion_bajo
+                // ahora permite mayúsculas también
+                'regex:/^[A-Za-z0-9._-]+$/',
                 Rule::unique('users', 'username'),
             ],
 
-            // ahora nullable
-            'name'         => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
 
-            'email'        => 'required|email|unique:users,email',
-            'password'     => [
+            'email' => 'required|email|unique:users,email',
+
+            'password' => [
                 'required',
                 'string',
                 'min:8',
                 'max:16',
-                // tu regex original: mayúscula + símbolo (si quieres exigir dígito, añade (?=.*\d))
+                // debe incluir al menos una mayúscula, un número y un símbolo
                 'regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,16}$/',
-
             ],
-            'phone'        => 'nullable|string|max:20',
 
-            // Si vas a crear también el Customer justo después, puedes aceptar city aquí:
-            'city'         => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+
+            'city'  => 'nullable|string|max:255',
 
             'accept_terms' => 'required|accepted',
         ];
@@ -64,9 +65,19 @@ class RegisterRequest extends FormRequest
         return [
             'username.required' => 'El nombre de usuario es obligatorio.',
             'username.unique'   => 'Este nombre de usuario ya está en uso.',
-            'username.regex'    => 'El nombre de usuario solo puede contener letras minúsculas, números, puntos, guiones y guiones bajos.',
+            'username.regex'    => 'El nombre de usuario solo puede contener letras, números, puntos, guiones y guiones bajos.',
             'username.min'      => 'El nombre de usuario debe tener al menos :min caracteres.',
             'username.max'      => 'El nombre de usuario no puede superar los :max caracteres.',
+
+            'email.required'    => 'El correo electrónico es obligatorio.',
+            'email.email'       => 'El correo electrónico no tiene un formato válido.',
+            'email.unique'      => 'Este correo electrónico ya está registrado.',
+
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min'      => 'La contraseña debe tener al menos :min caracteres.',
+            'password.max'      => 'La contraseña no puede superar los :max caracteres.',
+            'password.regex'    => 'La contraseña debe incluir al menos una mayúscula, un número y un símbolo.',
+
             'accept_terms.accepted' => 'Debes aceptar los términos y condiciones.',
         ];
     }

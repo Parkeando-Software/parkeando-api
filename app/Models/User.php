@@ -85,22 +85,6 @@ class User extends Authenticatable
         return $this->hasMany(SocialAccount::class);
     }
 
-    // ─────────────── MUTATOR ───────────────
-
-    //username y email guardado en minusculas
-    protected function username(): Attribute
-    {
-        return Attribute::make(
-            set: fn($value) => strtolower(trim($value))
-        );
-    }
-
-    
-   protected function email(): Attribute
-{
-    return Attribute::make(
-        set: fn($value) => strtolower(trim($value))
-    );
-}
+  
 
 }
