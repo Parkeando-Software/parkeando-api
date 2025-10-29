@@ -39,20 +39,12 @@ class DeleteAccountCancellationNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Solicitud de eliminación cancelada - Parkeando')
-            ->greeting("¡Hola {$notifiable->username}!")
-            ->line('Tu solicitud de eliminación de cuenta ha sido **cancelada exitosamente**.')
-            ->line('Tu cuenta y todos tus datos permanecen intactos.')
-            ->line('**Detalles de la solicitud cancelada:**')
-            ->line("• **ID de solicitud:** {$this->deleteRequest->id}")
-            ->line("• **Fecha de cancelación:** {$this->deleteRequest->cancelled_at->format('d/m/Y H:i')}")
-            ->line('**¿Qué significa esto?**')
-            ->line('• Tu cuenta sigue activa y funcional')
-            ->line('• Todos tus datos están seguros')
-            ->line('• Puedes seguir usando Parkeando normalmente')
-            ->line('• Si cambias de opinión en el futuro, puedes solicitar la eliminación nuevamente')
-            ->line('Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.')
-            ->salutation('¡Gracias por seguir con nosotros!');
+            ->view('emails.delete-cancelled', [
+                'username' => $notifiable->username,
+                'deleteRequest' => $this->deleteRequest,
+            ]);
     }
+
 
     /**
      * Get the array representation of the notification.

@@ -29,10 +29,9 @@ class ActivateAccountNotification extends Notification
 
         return (new MailMessage)
             ->subject('Activa tu cuenta - Parkeando')
-            ->greeting("¡Hola {$notifiable->username}!")
-            ->line('Gracias por registrarte. Para activar tu cuenta, haz clic en el botón de abajo.')
-            ->action('Activar cuenta', $activationUrl)
-            ->line('Si tú no creaste esta cuenta, ignora este mensaje.')
-            ->salutation('¡Gracias por usar Parkeando!');
+            ->view('emails.activate-account', [
+                'username' => $notifiable->username,
+                'activationUrl' => $activationUrl,
+            ]);
     }
 }

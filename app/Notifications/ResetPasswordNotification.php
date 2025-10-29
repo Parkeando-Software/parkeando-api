@@ -43,14 +43,13 @@ class ResetPasswordNotification extends Notification
 
         return (new MailMessage)
             ->subject('Restablecer Contraseña - Parkeando')
-            ->greeting('¡Hola ' . $notifiable->username . '!')
-            ->line('Recibimos una solicitud para restablecer la contraseña de tu cuenta.')
-            ->line('Si solicitaste este cambio, haz clic en el botón de abajo para crear una nueva contraseña:')
-            ->action('Restablecer Contraseña', $resetUrl)
-            ->line('Este enlace expirará en 60 minutos.')
-            ->line('Si no solicitaste este cambio, puedes ignorar este email.')
-            ->salutation('¡Gracias por usar Parkeando!');
+            ->view('emails.reset-password', [
+                'url' => $resetUrl,
+                'username' => $notifiable->username,
+            ]);
     }
+
+
 
     /**
      * Get the array representation of the notification.

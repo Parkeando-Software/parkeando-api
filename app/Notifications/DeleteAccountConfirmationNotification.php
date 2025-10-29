@@ -39,31 +39,20 @@ class DeleteAccountConfirmationNotification extends Notification
     {
         $confirmationUrl = config('app.frontend_url') . '/account/delete-request/confirm/' . $this->deleteRequest->confirmation_token;
         $cancellationUrl = config('app.frontend_url') . '/account/delete-request/cancel/' . $this->deleteRequest->confirmation_token;
-        
-        $reasonText = DeleteRequest::REASONS[$this->deleteRequest->reason] ?? $this->deleteRequest->reason;
+
+        $reasonText = \App\Models\DeleteRequest::REASONS[$this->deleteRequest->reason] ?? $this->deleteRequest->reason;
 
         return (new MailMessage)
             ->subject('Confirmación de eliminación de cuenta - Parkeando')
-            ->greeting("¡Hola {$notifiable->username}!")
-            ->line('Hemos recibido tu solicitud de eliminación de cuenta y datos personales.')
-            ->line("**Motivo:** {$reasonText}")
-            ->when($this->deleteRequest->additional_info, function ($message) {
-                return $message->line("**Información adicional:** {$this->deleteRequest->additional_info}");
-            })
-            ->line('**IMPORTANTE:** Para proceder con la eliminación, debes confirmar tu solicitud haciendo clic en el botón de abajo.')
-            ->line('Una vez confirmada, tu cuenta será eliminada en **30 días**. Durante este período podrás cancelar la solicitud.')
-            ->action('Confirmar eliminación', $confirmationUrl)
-            ->line('Si cambias de opinión, puedes cancelar la solicitud:')
-            ->action('Cancelar solicitud', $cancellationUrl)
-            ->line('**¿Qué se eliminará?**')
-            ->line('• Tu cuenta de usuario')
-            ->line('• Todos tus datos personales')
-            ->line('• Historial de aparcamiento')
-            ->line('• Vehículos registrados')
-            ->line('• Notificaciones y preferencias')
-            ->line('Si tú no solicitaste esta eliminación, ignora este mensaje.')
-            ->salutation('Gracias por usar Parkeando');
+            ->view('emails.delete-confirmation', [
+                'username' => $notifiable->username,
+                'confirmationUrl' => $confirmationUrl,
+                'cancellationUrl' => $cancellationUrl,
+                'reasonText' => $reasonText,
+                'additionalInfo' => $this->deleteRequest->additional_info,
+            ]);
     }
+
 
     /**
      * Get the array representation of the notification.
