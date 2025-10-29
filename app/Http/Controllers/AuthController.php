@@ -86,7 +86,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.',
+            'message' => 'Tu cuenta ha sido activada correctamente.',
         ]);
     }
 
