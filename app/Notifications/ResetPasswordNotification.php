@@ -43,7 +43,7 @@ class ResetPasswordNotification extends Notification
 
         return (new MailMessage)
             ->subject('Restablecer Contraseña - Parkeando')
-            ->greeting('¡Hola ' . $notifiable->name . '!')
+            ->greeting('¡Hola ' . $notifiable->username . '!')
             ->line('Recibimos una solicitud para restablecer la contraseña de tu cuenta.')
             ->line('Si solicitaste este cambio, haz clic en el botón de abajo para crear una nueva contraseña:')
             ->action('Restablecer Contraseña', $resetUrl)

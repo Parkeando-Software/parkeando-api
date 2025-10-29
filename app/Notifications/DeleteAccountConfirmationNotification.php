@@ -44,7 +44,7 @@ class DeleteAccountConfirmationNotification extends Notification
 
         return (new MailMessage)
             ->subject('Confirmación de eliminación de cuenta - Parkeando')
-            ->greeting("¡Hola {$notifiable->name}!")
+            ->greeting("¡Hola {$notifiable->username}!")
             ->line('Hemos recibido tu solicitud de eliminación de cuenta y datos personales.')
             ->line("**Motivo:** {$reasonText}")
             ->when($this->deleteRequest->additional_info, function ($message) {

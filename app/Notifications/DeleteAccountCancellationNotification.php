@@ -39,7 +39,7 @@ class DeleteAccountCancellationNotification extends Notification
     {
         return (new MailMessage)
             ->subject('Solicitud de eliminación cancelada - Parkeando')
-            ->greeting("¡Hola {$notifiable->name}!")
+            ->greeting("¡Hola {$notifiable->username}!")
             ->line('Tu solicitud de eliminación de cuenta ha sido **cancelada exitosamente**.')
             ->line('Tu cuenta y todos tus datos permanecen intactos.')
             ->line('**Detalles de la solicitud cancelada:**')
